@@ -1,0 +1,9 @@
+ray[default]
+torch
+torchaudio
+pyannote.audio
+lancedb
+watchdog
+numpy
+pandas
+pyarrow
