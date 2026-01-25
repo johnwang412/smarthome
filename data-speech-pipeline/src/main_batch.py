@@ -1,5 +1,6 @@
 import ray
 import os
+import argparse
 from pathlib import Path
 from src import config
 from src.processors import process_remote_task
@@ -8,24 +9,31 @@ def main():
     """
     Batch processing entry point.
     """
+    parser = argparse.ArgumentParser(description="Batch process audio files.")
+    parser.add_argument("--input_dir", type=str, help="Input directory containing .wav files")
+    parser.add_argument("--output_dir", type=str, help="Output directory for JSON results")
+    args = parser.parse_args()
+
+    input_dir = Path(args.input_dir) if args.input_dir else config.INPUT_DIR
+    output_dir = Path(args.output_dir) if args.output_dir else config.OUTPUT_DIR
+
     ray.init(ignore_reinit_error=True)
 
     # Ensure output exists
-    config.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
     # 1. List files (or use Ray Data to read)
     # For massive scale (100k files), using ray.data.from_items is efficient.
     # Alternatively, use ray.data.read_binary_files if you want to read content lazily,
     # but since our pipeline loads the file via path, passing paths is better.
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    input_pattern = str(config.INPUT_DIR / "*.wav")
+    input_pattern = str(input_dir / "*.wav")
     print(f"Scanning for files in {input_pattern}...")
 
     # For demo, just listing files in directory using glob
-    files = [str(p) for p in config.INPUT_DIR.glob("*.wav")]
+    files = [str(p) for p in input_dir.glob("*.wav")]
 
     if not files:
-        print("No .wav files found in input directory.")
+        print(f"No .wav files found in input directory: {input_dir}")
         return
 
     print(f"Found {len(files)} files. Starting batch processing...")
@@ -42,18 +50,13 @@ def main():
     # Since process_remote_task is an actor/remote function, we can just call the underlying logic
     # or wrap it.
 
-    class FileProcessor:
-        def __call__(self, batch):
-            # batch is a dict usually if from_items or pandas
-            # with from_items(list), it might be a simple item if mapped row-by-row
-            pass
-
     # For now, let's stick to the simplest robust way: parallel iterator
     # We can just map a function that calls the pipeline directly, Ray handles the scheduling.
 
+    out_dir_str = str(output_dir)
     ds.map(
-        lambda row: process_remote_task.remote(row["item"])
-        if isinstance(row, dict) else process_remote_task.remote(row)
+        lambda row: process_remote_task.remote(row["item"], output_dir=out_dir_str)
+        if isinstance(row, dict) else process_remote_task.remote(row, output_dir=out_dir_str)
     ).take_all() # Force execution
 
     print("Batch processing complete.")

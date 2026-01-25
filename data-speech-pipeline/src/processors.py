@@ -6,7 +6,7 @@ from src.db.manager import SpeakerDB
 from src.config import OUTPUT_DIR, NUM_CPUS
 
 @ray.remote(num_cpus=NUM_CPUS)
-def process_remote_task(file_path: str):
+def process_remote_task(file_path: str, output_dir: str = None):
     """
     Ray task wrapper.
     1. Runs pipeline.
@@ -27,8 +27,7 @@ def process_remote_task(file_path: str):
     # Note: LanceDB connection might need to be handled carefuly in distributed setting.
     # ideally, we might have a centralized actor for DB writes to avoid locking issues,
     # or just rely on LanceDB's concurrency if supported.
-    # For now, we instantiate DB here (safe for read/write if locking handled by FS/DB)
-    db = SpeakerDB()
+    # For now, we instantiate DB here (safe for read/write if locking handled by FS/DB)    db = SpeakerDB()
 
     file_results = []
 
@@ -58,7 +57,8 @@ def process_remote_task(file_path: str):
         })
 
     # 3. Save Output
-    output_path = OUTPUT_DIR / f"{path.stem}.json"
+    out_dir = Path(output_dir) if output_dir else OUTPUT_DIR
+    output_path = out_dir / f"{path.stem}.json"
     output_data = {
         "file": file_path,
         "results": file_results
