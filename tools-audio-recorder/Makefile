@@ -9,4 +9,4 @@ install:
 	$(PIP) install -r requirements.txt
 
 run: install
-	$(PYTHON) samson_audio_recorder.py --output-dir "/Users/johnwang/Documents/Raw Recordings"
+	$(PYTHON) samson_audio_recorder.py --output-dir "/Users/johnwang/Documents/audio-recorder-data/prod/raw-recordings"
