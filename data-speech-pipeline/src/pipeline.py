@@ -2,7 +2,7 @@ import torch
 import torchaudio
 import numpy as np
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 from pyannote.audio import Pipeline, Inference
 from src.config import HF_TOKEN
 

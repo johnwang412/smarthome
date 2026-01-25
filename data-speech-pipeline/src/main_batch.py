@@ -9,14 +9,25 @@ def main():
     """
     Batch processing entry point.
     """
+    print("Batch processing audio files...")
+
     parser = argparse.ArgumentParser(description="Batch process audio files.")
-    parser.add_argument("--input_dir", type=str, help="Input directory containing .wav files")
-    parser.add_argument("--output_dir", type=str, help="Output directory for JSON results")
+    parser.add_argument("--data-root-dir", type=str, help="Root data directory containing 'raw-recordings'")
     args = parser.parse_args()
 
-    input_dir = Path(args.input_dir) if args.input_dir else config.INPUT_DIR
-    output_dir = Path(args.output_dir) if args.output_dir else config.OUTPUT_DIR
+    if not args.data_root_dir:
+        print("Error: --data-root-dir is required.")
+        exit(1)
 
+    data_root_dir = Path(args.data_root_dir)
+    input_dir = data_root_dir / "raw-recordings"
+    output_dir = data_root_dir / "output"
+
+    if not input_dir.exists() or not input_dir.is_dir():
+        print(f"Error: Folder 'raw-recordings' not found in root directory: {data_root_dir}")
+        exit(1)
+
+    print(f'Initializing Ray...')
     ray.init(ignore_reinit_error=True)
 
     # Ensure output exists
