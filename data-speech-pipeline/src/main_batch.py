@@ -37,14 +37,14 @@ def main():
     # but since our pipeline loads the file via path, passing paths is better.
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    input_pattern = str(input_dir / "*.wav")
-    print(f"Scanning for files in {input_pattern}...")
+    print(f"Scanning for files in {input_dir} with extensions {config.SUPPORTED_EXTENSIONS}...")
 
-    # For demo, just listing files in directory using glob
-    files = [str(p) for p in input_dir.glob("*.wav")]
+    files = []
+    for ext in config.SUPPORTED_EXTENSIONS:
+        files.extend([str(p) for p in input_dir.glob(f"*{ext}")])
 
     if not files:
-        print(f"No .wav files found in input directory: {input_dir}")
+        print(f"No supported files {config.SUPPORTED_EXTENSIONS} found in input directory: {input_dir}")
         return
 
     print(f"Found {len(files)} files. Starting batch processing...")

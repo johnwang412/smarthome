@@ -19,3 +19,5 @@ NUM_GPUS = 0 # Set to 1 if GPU available
 # Vector DB
 VECTOR_DIM = 512 # Depends on embedding model
 SIMILARITY_THRESHOLD = 0.5
+# File Extensions
+SUPPORTED_EXTENSIONS = [".wav", ".mp3"]

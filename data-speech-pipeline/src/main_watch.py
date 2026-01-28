@@ -8,10 +8,12 @@ from src.processors import process_remote_task
 
 class AudioHandler(FileSystemEventHandler):
     def on_created(self, event):
-        if not event.is_directory and event.src_path.endswith('.wav'):
-            print(f"New file file detected: {event.src_path}")
-            # Submit Ray task
-            process_remote_task.remote(event.src_path)
+        if not event.is_directory:
+            ext = Path(event.src_path).suffix.lower()
+            if ext in config.SUPPORTED_EXTENSIONS:
+                print(f"New audio file detected: {event.src_path}")
+                # Submit Ray task
+                process_remote_task.remote(event.src_path)
 
 def main():
     """
@@ -28,7 +30,7 @@ def main():
     observer = Observer()
     observer.schedule(event_handler, path=str(config.INPUT_DIR), recursive=False)
 
-    print(f"Watching {config.INPUT_DIR} for .wav files...")
+    print(f"Watching {config.INPUT_DIR} for {config.SUPPORTED_EXTENSIONS} files...")
     observer.start()
 
     try:
