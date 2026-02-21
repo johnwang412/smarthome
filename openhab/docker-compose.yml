@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  openhab:
+    image: openhab/openhab:latest
+    container_name: openhab
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      USER_ID: 501
+      GROUP_ID: 20
+      TZ: America/New_York
+      # TODO: add usb device
+      # # Often required for openHAB to recognize serial ports correctly
+      # EXTRA_JAVA_OPTS: "-Dgnu.io.rxtx.SerialPorts=/dev/ttyUSB0"
+    volumes:
+      - ~/Documents/openhab/conf:/openhab/conf
+      - ~/Documents/openhab/userdata:/openhab/userdata
+      - ~/Documents/openhab/addons:/openhab/addons
+    # TODO: add usb device
+    # devices:
+    #   # Format: host_path:container_path
+    #   - "/dev/tty.usbserial-1410:/dev/ttyUSB0"
