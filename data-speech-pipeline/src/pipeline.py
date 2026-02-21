@@ -1,7 +1,3 @@
-import os
-# Fix PyTorch 2.6+ weights_only=True compatibility issue with pyannote models
-os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
-
 import torch
 import torchaudio
 import numpy as np

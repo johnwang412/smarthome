@@ -15,5 +15,7 @@ run-batch: install
 	PYTHONPATH=. $(PYTHON) src/main_batch.py --data-root-dir "/Users/johnwang/Documents/audio-recorder-data/test"
 
 process-file: install
-	@if [ -z "$(FILE)" ]; then echo "Error: FILE is required. Usage: make process-file FILE=path/to/file.wav [OUT_DIR=output/]"; exit 1; fi
-	PYTHONPATH=. $(PYTHON) src/processors.py "$(FILE)" $(if $(OUT_DIR),--output-dir "$(OUT_DIR)",)
+	source runtime-vars.sh && \
+	PYTHONPATH=. $(PYTHON) src/processors.py \
+		"/Users/johnwang/Documents/audio-recorder-data/prod/raw-recordings/2025-12-18_091205_recording.mp3" \
+		--output-dir "."
