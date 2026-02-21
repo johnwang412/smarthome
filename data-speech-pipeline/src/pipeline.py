@@ -13,17 +13,17 @@ _EMBEDDING_MODEL = None
 def get_diarization_pipeline():
     global _DIARIZATION_PIPELINE
     if _DIARIZATION_PIPELINE is None:
-        # Note: This requires a valid HF_TOKEN environment variable or passing use_auth_token
+        # Note: This requires a valid HF_TOKEN environment variable or passing token
         _DIARIZATION_PIPELINE = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-3.1",
-            use_auth_token=HF_TOKEN
+            token=HF_TOKEN
         )
     return _DIARIZATION_PIPELINE
 
 def get_embedding_model():
     global _EMBEDDING_MODEL
     if _EMBEDDING_MODEL is None:
-        _EMBEDDING_MODEL = Inference("pyannote/embedding", use_auth_token=HF_TOKEN)
+        _EMBEDDING_MODEL = Inference("pyannote/embedding", token=HF_TOKEN)
     return _EMBEDDING_MODEL
 
 def extract_embedding_for_speaker(waveform: torch.Tensor, sample_rate: int, segments: List[Tuple[float, float]]) -> np.ndarray:

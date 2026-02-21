@@ -5,10 +5,10 @@ from src.pipeline import analyze_file
 from src.db.manager import SpeakerDB
 from src.config import OUTPUT_DIR, NUM_CPUS
 
-@ray.remote(num_cpus=NUM_CPUS)
-def process_remote_task(file_path: str, output_dir: str = None):
+def process_file(file_path: str, output_dir: str = None):
     """
-    Ray task wrapper.
+    Core processing logic for a single file.
+    Can be called directly (no Ray) or via Ray.
     1. Runs pipeline.
     2. Updates DB.
     3. Saves JSON result.
@@ -24,10 +24,7 @@ def process_remote_task(file_path: str, output_dir: str = None):
         return {"error": str(e), "file": file_path}
 
     # 2. Database Interaction
-    # Note: LanceDB connection might need to be handled carefuly in distributed setting.
-    # ideally, we might have a centralized actor for DB writes to avoid locking issues,
-    # or just rely on LanceDB's concurrency if supported.
-    # For now, we instantiate DB here (safe for read/write if locking handled by FS/DB)    db = SpeakerDB()
+    db = SpeakerDB()
 
     file_results = []
 
@@ -69,3 +66,27 @@ def process_remote_task(file_path: str, output_dir: str = None):
 
     print(f"Finished: {path.name} -> {output_path.name}")
     return output_data
+
+@ray.remote(num_cpus=NUM_CPUS)
+def process_remote_task(file_path: str, output_dir: str = None):
+    """
+    Ray task wrapper.
+    """
+    return process_file(file_path, output_dir)
+
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="Process a single audio file.")
+    parser.add_argument("file_path", type=str, help="Path to the audio file")
+    parser.add_argument("--output-dir", type=str, default=None, help="Directory to save output")
+
+    args = parser.parse_args()
+
+    # Direct execution without Ray
+    result = process_file(args.file_path, output_dir=args.output_dir)
+
+    if isinstance(result, dict) and "error" in result:
+        print(f"Error: {result['error']}")
+        sys.exit(1)
