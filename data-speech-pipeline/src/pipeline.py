@@ -1,3 +1,7 @@
+import os
+# Fix PyTorch 2.6+ weights_only=True compatibility issue with pyannote models
+os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
+
 import torch
 import torchaudio
 import numpy as np
@@ -63,7 +67,9 @@ def analyze_file(file_path: Path) -> Dict[str, Any]:
     path_str = str(file_path)
 
     # 1. Load Audio
+    print(f'************ loading audio via torchaudio.load: {path_str} ************')
     waveform, sample_rate = torchaudio.load(path_str)
+    print(f'************ load complete')
 
     # 2. Diarization
     pipeline = get_diarization_pipeline()
