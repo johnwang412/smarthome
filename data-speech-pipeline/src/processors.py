@@ -5,6 +5,7 @@ from src.pipeline import analyze_file
 from src.db.manager import SpeakerDB
 from src.config import OUTPUT_DIR, NUM_CPUS
 
+
 def process_file(file_path: str, output_dir: str = None):
     """
     Core processing logic for a single file.
@@ -85,8 +86,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Direct execution without Ray
-    result = process_file(args.file_path, output_dir=args.output_dir)
+    data = analyze_file(args.file_path)
 
-    if isinstance(result, dict) and "error" in result:
-        print(f"Error: {result['error']}")
-        sys.exit(1)
+    print(json.dumps(data, indent=2))
