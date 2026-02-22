@@ -1,0 +1,4 @@
+mlx-whisper
+pyannote.audio
+chromadb
+omegaconf
