@@ -50,12 +50,28 @@ def align_text_to_speakers(whisper_results, diarization):
         midpoint = (start + end) / 2
 
         assigned_speaker = "Unknown"
+        min_dist = float('inf')
 
-        # Find which diarization segment contains the midpoint of this word
+        # Find which diarization segment is closest to the midpoint of this word
         for turn, _, speaker_label in diarization.itertracks(yield_label=True):
             if turn.start <= midpoint <= turn.end:
+                dist = 0.0
+            elif midpoint < turn.start:
+                dist = turn.start - midpoint
+            else:
+                dist = midpoint - turn.end
+
+            if dist < min_dist:
+                min_dist = dist
                 assigned_speaker = speaker_label
+
+            # If we are strictly inside, no need to keep checking
+            if dist == 0.0:
                 break
+
+        # If the closest speech segment is more than 1.5 seconds away, leave it as Unknown
+        if min_dist > 1.5:
+            assigned_speaker = "Unknown"
 
         aligned_segments.append({
             "speaker": assigned_speaker,
@@ -83,7 +99,6 @@ def process_audio_refined(file_path):
 
     # C. Align them
     aligned_words = align_text_to_speakers(result, diarization)
-    breakpoint()
 
     # D. Group words back into readable sentences/turns
     final_transcript = []

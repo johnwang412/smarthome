@@ -11,3 +11,5 @@ $(VENV)/bin/activate: requirements.txt
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
 
+test:
+	$(PYTHON) seed_script.py ../../zztmp-test-files/sample-audio2.wav
